@@ -28,6 +28,8 @@ class Message implements \JsonSerializable
     private $recipientType;
     private $timeToLive;
     private $delayWhileIdle;
+    private $mutableContent;
+    private $restrictedPackageName;
 
     /**
      * Represents the app's "Send-to-Sync" message.
@@ -66,6 +68,21 @@ class Message implements \JsonSerializable
     public function setNotification(Notification $notification)
     {
         $this->notification = $notification;
+        return $this;
+    }
+
+    /**
+     * Custom package name
+     *
+     * @see https://firebase.google.com/docs/cloud-messaging/http-server-ref#table1
+     *
+     * @param string $package_name
+     *
+     * @return \paragraph1\phpFCM\Message
+     */
+    public function setRestrictedPackageName($package_name)
+    {
+        $this->restrictedPackageName = $package_name;
         return $this;
     }
 
@@ -123,6 +140,10 @@ class Message implements \JsonSerializable
         return $this;
     }
 
+    public function setMutableContent()
+    {
+        $this->mutableContent = 1;
+    }
     /**
      * @see https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
      *
@@ -166,8 +187,16 @@ class Message implements \JsonSerializable
         if ($this->delayWhileIdle) {
             $jsonData['delay_while_idle'] = (bool)$this->delayWhileIdle;
         }
+
+        if ($this->mutableContent) {
+            $jsonData['mutable_content'] = (bool)$this->mutableContent;
+        }
+
         if ($this->contentAvailableFlag === TRUE) {
             $jsonData['content_available'] = TRUE;
+        }
+        if ($this->restrictedPackageName) {
+            $jsonData['restricted_package_name'] = $this->restrictedPackageName;
         }
 
         return $jsonData;
